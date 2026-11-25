@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DELTA 16 AK — Навчальна платформа тестування</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-2: #273549;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --ok: #22c55e;
+      --bad: #ef4444;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
+    .container { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
+    header {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+      padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .badge {
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      color: #fff; font-weight: 800; padding: 8px 12px; border-radius: 10px; letter-spacing: 0.5px;
+    }
+    h1 { font-size: 1.35rem; }
+    h2 { font-size: 1.2rem; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); font-size: 0.9rem; }
+    .nav-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+    button {
+      cursor: pointer; border: none; border-radius: 8px; padding: 10px 16px;
+      font-weight: 600; font-size: 0.95rem; transition: 0.15s;
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #082f49; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { background: var(--card-2); }
+    .btn-danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.25); }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 24px; margin-bottom: 20px;
+    }
+    label { display: block; font-size: 0.9rem; color: var(--muted); margin-bottom: 6px; }
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 11px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-size: 1rem; margin-bottom: 14px;
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+      outline: none; border-color: var(--accent);
+    }
+    .q-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .q-num { color: var(--accent); font-weight: 700; font-size: 0.9rem; }
+    .q-type {
+      font-size: 0.8rem; padding: 3px 10px; border-radius: 999px;
+      background: rgba(56, 189, 248, 0.14); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .q-text { font-size: 1.08rem; font-weight: 600; margin-bottom: 14px; }
+    .options { display: grid; gap: 10px; }
+    .opt {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 0;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 10px; cursor: pointer;
+      color: var(--text); font-size: 0.98rem;
+    }
+    .opt:hover { border-color: var(--accent); }
+    .opt.selected { border-color: var(--accent); background: rgba(56, 189, 248, 0.08); }
+    .opt input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+
+    .progress-bar { width: 100%; height: 8px; background: var(--bg); border-radius: 999px; overflow: hidden; margin-bottom: 16px; }
+    .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.2s; }
+
+    .score-box { text-align: center; padding: 16px 0; }
+    .score-big { font-size: 2.4rem; font-weight: 800; color: var(--accent); margin: 6px 0; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.92rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; }
+    .bar-bg { width: 100%; height: 10px; background: var(--bg); border-radius: 6px; overflow: hidden; }
+    .bar-ok { height: 100%; background: var(--ok); }
+    .analytics-q { padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .analytics-q:last-child { border-bottom: none; }
+    .opt-stat { display: flex; justify-content: space-between; gap: 12px; font-size: 0.88rem; color: var(--muted); margin-top: 4px; }
+    .correct-tag { color: var(--ok); font-weight: 700; }
+    .notice { color: #fca5a5; font-size: 0.88rem; margin-top: 10px; min-height: 20px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="badge">DELTA 16 AK</div>
+        <div>
+          <h1>Навчальна платформа тестування</h1>
+          <div class="subtitle">20 питань • 4 варіанти • 1 або 2 правильні відповіді • Аналітика</div>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button type="button" id="nav-student-btn" class="btn-primary">Тест для студента</button>
+        <button type="button" id="nav-admin-btn" class="btn-ghost">Адмін-панель</button>
+      </div>
+    </header>
+
+    <!-- ЕКРАН СТУДЕНТА -->
+    <section id="view-student">
+      <div id="start-card" class="card">
+        <h2>Реєстрація перед тестом</h2>
+        <p class="subtitle" style="margin-bottom: 16px;">
+          Введіть прізвище та ініціали. У тесті 20 питань по 4 варіанти — у деяких питаннях можуть бути дві правильні відповіді.
+        </p>
+        <label for="student-name">Прізвище та ініціали *</label>
+        <input type="text" id="student-name" placeholder="Наприклад: Коваленко О.М." autocomplete="off" />
+
+        <label for="student-group">Група / підрозділ (необов'язково)</label>
+        <input type="text" id="student-group" placeholder="Наприклад: Група 16-А" autocomplete="off" />
+
+        <button type="button" id="start-quiz-btn" class="btn-primary">Почати тест (20 питань)</button>
+        <div id="start-error" class="notice"></div>
+      </div>
+
+      <div id="quiz-card" class="card hidden">
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        <div class="q-header">
+          <span id="q-num" class="q-num">Питання 1 з 20</span>
+          <span id="q-type" class="q-type">1 правильна відповідь</span>
+        </div>
+        <div id="q-text" class="q-text"></div>
+        <div id="options-box" class="options"></div>
+        <div id="quiz-error" class="notice"></div>
+        <div style="display:flex; justify-content:space-between; margin-top:14px; gap:10px;">
+          <button type="button" id="prev-btn" class="btn-ghost">Назад</button>
+          <button type="button" id="next-btn" class="btn-primary">Далі</button>
+        </div>
+      </div>
+
+      <div id="result-card" class="card hidden">
+        <div class="score-box">
+          <div class="subtitle">Тест завершено</div>
+          <div id="res-name" style="font-size:1.2rem; font-weight:700; margin-top:6px;"></div>
+          <div id="res-score" class="score-big">0 / 20</div>
+          <div id="res-pct" class="subtitle"></div>
+        </div>
+        <div style="text-align:center; margin-top:16px;">
+          <button type="button" id="restart-btn" class="btn-primary">Пройти ще раз (новий студент)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЕКРАН АДМІНА -->
+    <section id="view-admin" class="hidden">
+      <div id="admin-login" class="card">
+        <h2>Вхід в адмін-панель DELTA 16 AK</h2>
+        <p class="subtitle" style="margin-bottom:14px;">Пароль за замовчуванням: <code>delta16</code></p>
+        <label for="admin-pass">Пароль</label>
+        <input type="password" id="admin-pass" placeholder="Введіть пароль" />
+        <button type="button" id="login-admin-btn" class="btn-primary">Увійти</button>
+        <div id="admin-error" class="notice"></div>
+      </div>
+
+      <div id="admin-panel" class="hidden">
+        <div class="card">
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px;">
+            <div>
+              <h2>Результати студентів</h2>
+              <div id="admin-summary" class="subtitle"></div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <button type="button" id="export-csv-btn" class="btn-ghost">Завантажити CSV</button>
+              <button type="button" id="clear-data-btn" class="btn-danger">Очистити дані</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Прізвище та ініціали</th>
+                  <th>Група</th>
+                  <th>Бали</th>
+                  <th>%</th>
+                  <th>Дата</th>
+                </tr>
+              </thead>
+              <tbody id="results-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Аналітика по кожному питанню</h2>
+          <p class="subtitle" style="margin-bottom:12px;">
+            Частка правильних відповідей по кожному з 20 питань і скільки разів обрали кожен із 4 варіантів.
+          </p>
+          <div id="analytics-box"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const QUESTIONS = Array.from({ length: 20 }, (_, i) => {
+      const multi = i % 3 === 1;
+      return {
+        id: i + 1,
+        text: `Питання №${i + 1} (DELTA 16 AK): оберіть ${multi ? "ДВІ правильні відповіді" : "правильну відповідь"}.`,
+        options: [
+          `Варіант А для питання ${i + 1}`,
+          `Варіант Б для питання ${i + 1}`,
+          `Варіант В для питання ${i + 1}`,
+          `Варіант Г для питання ${i + 1}`
+        ],
+        correct: multi ? [0, 2] : [1]
+      };
+    });
+
+    const STORAGE_KEY = "delta_16_ak_results_v1";
+    const ADMIN_PASS = "delta16";
+
+    let currentStudent = null;
+    let currentIndex = 0;
+    let answers = Array.from({ length: QUESTIONS.length }, () => []);
+    let isAdminAuth = false;
+
+    function showView(view) {
+      const isStudent = view === "student";
+      document.getElementById("view-student").classList.toggle("hidden", !isStudent);
+      document.getElementById("view-admin").classList.toggle("hidden", isStudent);
+
+      document.getElementById("nav-student-btn").className = isStudent ? "btn-primary" : "btn-ghost";
+      document.getElementById("nav-admin-btn").className = !isStudent ? "btn-primary" : "btn-ghost";
+
+      if (!isStudent) {
+        if (isAdminAuth) {
+          renderAdmin();
+        } else {
+          document.getElementById("admin-pass").focus();
+        }
+      }
+    }
+
+    function startQuiz() {
+      const nameInput = document.getElementById("student-name");
+      const groupInput = document.getElementById("student-group");
+      const errBox = document.getElementById("start-error");
+      const name = nameInput.value.trim();
+      const group = groupInput.value.trim();
+
+      if (!name) {
+        errBox.textContent = "Введіть прізвище та ініціали перед початком тесту.";
+        nameInput.focus();
+        return;
+      }
+
+      errBox.textContent = "";
+      currentStudent = { name, group: group || "—" };
+      currentIndex = 0;
+      answers = Array.from({ length: QUESTIONS.length }, () => []);
+
+      document.getElementById("start-card").classList.add("hidden");
+      document.getElementById("result-card").classList.add("hidden");
+      document.getElementById("quiz-card").classList.remove("hidden");
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = QUESTIONS[currentIndex];
+      const isMulti = q.correct.length > 1;
+      const selected = answers[currentIndex];
+
+      document.getElementById("quiz-error").textContent = "";
+      document.getElementById("progress-fill").style.width = `${((currentIndex + 1) / QUESTIONS.length) * 100}%`;
+      document.getElementById("q-num").textContent = `Питання ${currentIndex + 1} з ${QUESTIONS.length}`;
+      document.getElementById("q-type").textContent = isMulti ? "Оберіть до 2 варіантів" : "1 правильна відповідь";
+      document.getElementById("q-text").textContent = q.text;
+
+      const box = document.getElementById("options-box");
+      box.innerHTML = "";
+
+      q.options.forEach((optText, idx) => {
+        const isChecked = selected.includes(idx);
+        const label = document.createElement("label");
+        label.className = `opt${isChecked ? " selected" : ""}`;
+
+        const input = document.createElement("input");
+        input.type = isMulti ? "checkbox" : "radio";
+        input.name = `q_${q.id}`;
+        input.checked = isChecked;
+
+        input.addEventListener("change", () => {
+          handleOptionChange(idx, isMulti);
+        });
+
+        const span = document.createElement("span");
+        span.textContent = optText;
+
+        label.appendChild(input);
+        label.appendChild(span);
+        box.appendChild(label);
+      });
+
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").textContent =
+        currentIndex === QUESTIONS.length - 1 ? "Завершити тест" : "Далі";
+    }
+
+    function handleOptionChange(idx, isMulti) {
+      const errBox = document.getElementById("quiz-error");
+      errBox.textContent = "";
+
+      if (!isMulti) {
+        answers[currentIndex] = [idx];
+        renderQuestion();
+        return;
+      }
+
+      const arr = answers[currentIndex];
+      if (arr.includes(idx)) {
+        answers[currentIndex] = arr.filter((x) => x !== idx);
+        renderQuestion();
+      } else {
+        if (arr.length >= 2) {
+          errBox.textContent = "У цьому питанні можна обрати максимум 2 варіанти.";
+          renderQuestion();
+          return;
+        }
+        answers[currentIndex] = [...arr, idx];
+        renderQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      const errBox = document.getElementById("quiz-error");
+      if (answers[currentIndex].length === 0) {
+        errBox.textContent = "Оберіть хоча б один варіант відповіді.";
+        return;
+      }
+
+      if (currentIndex < QUESTIONS.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function isQuestionCorrect(q, userAns) {
+      const a = [...q.correct].sort((x, y) => x - y).join(",");
+      const b = [...userAns].sort((x, y) => x - y).join(",");
+      return a === b;
+    }
+
+    function finishQuiz() {
+      let score = 0;
+      QUESTIONS.forEach((q, idx) => {
+        if (isQuestionCorrect(q, answers[idx])) score++;
+      });
+      const pct = Math.round((score / QUESTIONS.length) * 100);
+
+      const record = {
+        name: currentStudent.name,
+        group: currentStudent.group,
+        score,
+        total: QUESTIONS.length,
+        pct,
+        answers,
+        date: new Date().toLocaleString("uk-UA")
+      };
+
+      const all = getResults();
+      all.push(record);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+
+      document.getElementById("quiz-card").classList.add("hidden");
+      document.getElementById("result-card").classList.remove("hidden");
+      document.getElementById("res-name").textContent = `${record.name} (${record.group})`;
+      document.getElementById("res-score").textContent = `${score} / ${QUESTIONS.length}`;
+      document.getElementById("res-pct").textContent = `Точність: ${pct}%`;
+    }
+
+    function resetStudent() {
+      document.getElementById("student-name").value = "";
+      document.getElementById("student-group").value = "";
+      document.getElementById("start-error").textContent = "";
+      document.getElementById("result-card").classList.add("hidden");
+      document.getElementById("quiz-card").classList.add("hidden");
+      document.getElementById("start-card").classList.remove("hidden");
+      document.getElementById("student-name").focus();
+    }
+
+    function getResults() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function loginAdmin() {
+      const passInput = document.getElementById("admin-pass");
+      const errBox = document.getElementById("admin-error");
+      if (passInput.value === ADMIN_PASS) {
+        isAdminAuth = true;
+        errBox.textContent = "";
+        passInput.value = "";
+        document.getElementById("admin-login").classList.add("hidden");
+        document.getElementById("admin-panel").classList.remove("hidden");
+        renderAdmin();
+      } else {
+        errBox.textContent = "Невірний пароль. Спробуйте ще раз.";
+        passInput.focus();
+      }
+    }
+
+    function renderAdmin() {
+      const results = getResults();
+      const tbody = document.getElementById("results-tbody");
+      tbody.innerHTML = "";
+
+      const avgPct = results.length
+        ? Math.round(results.reduce((s, r) => s + r.pct, 0) / results.length)
+        : 0;
+
+      document.getElementById("admin-summary").textContent =
+        `Пройшло тестів: ${results.length} • Середній результат: ${avgPct}%`;
+
+      if (!results.length) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="6" style="color:var(--muted); text-align:center;">Поки що немає проходжень тесту.</td>`;
+        tbody.appendChild(tr);
+      } else {
+        results.slice().reverse().forEach((r, i) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${results.length - i}</td>
+            <td>${escapeHtml(r.name)}</td>
+            <td>${escapeHtml(r.group)}</td>
+            <td><strong>${r.score}/${r.total}</strong></td>
+            <td>${r.pct}%</td>
+            <td>${escapeHtml(r.date)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      renderAnalytics(results);
+    }
+
+    function renderAnalytics(results) {
+      const box = document.getElementById("analytics-box");
+      box.innerHTML = "";
+      const totalAttempts = results.length;
+
+      QUESTIONS.forEach((q, qIdx) => {
+        let correctCount = 0;
+        const optCounts = [0, 0, 0, 0];
+
+        results.forEach((r) => {
+          const userAns = (r.answers && r.answers[qIdx]) || [];
+          if (isQuestionCorrect(q, userAns)) correctCount++;
+          userAns.forEach((optIdx) => {
+            if (optCounts[optIdx] !== undefined) optCounts[optIdx]++;
+          });
+        });
+
+        const okPct = totalAttempts ? Math.round((correctCount / totalAttempts) * 100) : 0;
+        const div = document.createElement("div");
+        div.className = "analytics-q";
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; gap:8px;">
+            <strong>${qIdx + 1}. ${escapeHtml(q.text)}</strong>
+            <span>${correctCount}/${totalAttempts} (${okPct}%)</span>
+          </div>
+          <div class="bar-bg" style="margin:8px 0;"><div class="bar-ok" style="width:${okPct}%"></div></div>
+          ${q.options.map((opt, oIdx) => {
+            const isRight = q.correct.includes(oIdx);
+            const cnt = optCounts[oIdx];
+            const share = totalAttempts ? Math.round((cnt / totalAttempts) * 100) : 0;
+            return `
+              <div class="opt-stat">
+                <span>${escapeHtml(opt)} ${isRight ? '<span class="correct-tag">[правильна]</span>' : ''}</span>
+                <span>обрали: <strong>${cnt}</strong> (${share}%)</span>
+              </div>
+            `;
+          }).join("")}
+        `;
+        box.appendChild(div);
+      });
+    }
+
+    function exportCSV() {
+      const results = getResults();
+      if (!results.length) {
+        alert("Немає даних для експорту.");
+        return;
+      }
+      const rows = [["ПІБ", "Група", "Бали", "Всього", "Відсоток", "Дата"]];
+      results.forEach((r) => rows.push([r.name, r.group, r.score, r.total, `${r.pct}%`, r.date]));
+      const csv = rows
+        .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "delta_16_ak_results.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function clearResults() {
+      if (confirm("Видалити всі збережені результати студентів у цьому браузері?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderAdmin();
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+
+    document.getElementById("nav-student-btn").addEventListener("click", () => showView("student"));
+    document.getElementById("nav-admin-btn").addEventListener("click", () => showView("admin"));
+    document.getElementById("start-quiz-btn").addEventListener("click", startQuiz);
+    document.getElementById("prev-btn").addEventListener("click", prevQuestion);
+    document.getElementById("next-btn").addEventListener("click", nextQuestion);
+    document.getElementById("restart-btn").addEventListener("click", resetStudent);
+    document.getElementById("login-admin-btn").addEventListener("click", loginAdmin);
+    document.getElementById("export-csv-btn").addEventListener("click", exportCSV);
+    document.getElementById("clear-data-btn").addEventListener("click", clearResults);
+
+    document.getElementById("student-name").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") startQuiz();
+    });
+    document.getElementById("student-group").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") startQuiz();
+    });
+    document.getElementById("admin-pass").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loginAdmin();
+    });
+  </script>
+</body>
+</html>
